@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import re
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -114,14 +115,45 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """ Create an object of any class with parameters"""
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        # Split the arguments into class name and parameters
+        args_list = args.split()
+        class_name = args_list[0]
+        params_list = args_list[1:]
+
+        # Check if class exists
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+
+        # Create an instance of the class
+        new_instance = HBNBCommand.classes[class_name]()
+
+        # Parse and set parameters for the instance
+        for param in params_list:
+            match = re.match(r'^([a-zA-Z_]\w*)=(.+)$', param)
+            if match:
+                key, value = match.groups()
+                
+                # Handle different value types
+                if value[0] == '"' and value[-1] == '"' and value.count('\\"') % 2 == 0:
+                    # String value
+                    value = value[1:-1].replace('\\"', '"').replace('_', ' ')
+                elif '.' in value and all(c.isdigit() or c == '.' for c in value):
+                    # Float value
+                    value = float(value)
+                elif value.isdigit():
+                    # Integer value
+                    value = int(value)
+
+                # Set the attribute for the instance
+                setattr(new_instance, key, value)
+
+        # Save the instance and print its ID
         storage.save()
         print(new_instance.id)
         storage.save()
