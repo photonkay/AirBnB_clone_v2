@@ -12,16 +12,16 @@ from os import getenv
 class State(BaseModel, Base):
     """ State class """
 
-    __tablename__ = 'states'
-    name = Column(String(128), nullable=False)
+	    __tablename__ = 'states'
+name = Column(String(128), nullable=False)
+if getenv('HBNB_TYPE_STORAGE') == 'db':
     cities = relationship("City", backref="state")
-
-    if getenv('HBNB_TYPE_STORAGE') != "db":
-        @property
-        def cities(self):
-            cities_list = []
-            all_cities = models.storage.all(City)
-            for city in all_cities.values():
-                if self.id == city.state_id:
-                    cities_list.append(city)
-            return cities_list
+else:
+    @property
+    def cities(self):
+        cities_list = []
+        all_cities = models.storage.all(City)
+        for city in all_cities.values():
+            if self.id == city.state_id:
+                cities_list.append(city)
+        return cities_list
