@@ -13,6 +13,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from os import getenv
 
+from file_storage import FileStorage
 
 classes = {'User': User, 'Place': Place, 'Review': Review,
            'State': State, 'City': City}
+
+storage = FileStorage()
+storage.reload()
