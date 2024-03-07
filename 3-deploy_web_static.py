@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Compress web static package
+"""Deploy web static package
 """
 from fabric.api import *
 from datetime import datetime
@@ -9,6 +9,25 @@ from os import path
 env.hosts = ['18.209.20.255', '34.73.76.135']
 env.user = 'ubuntu'
 env.key_filename = '~/.ssh/id_rsa'
+
+
+def do_pack():
+        """Function to compress directory
+        Return: path to archive on success; None on fail
+        """
+        # Get current time
+        now = datetime.now()
+        now = now.strftime('%Y%m%d%H%M%S')
+        archive_path = 'versions/web_static_' + now + '.tgz'
+
+        # Create archive
+        local('mkdir -p versions/')
+        result = local('tar -cvzf {} web_static/'.format(archive_path))
+
+        # Check if archiving was successful
+        if result.succeeded:
+                return archive_path
+        return None
 
 
 def do_deploy(archive_path):
@@ -54,3 +73,9 @@ web_static_{}/ /data/web_static/current'.format(timestamp))
 
         # return True on success
         return True
+
+
+def deploy():
+        """Deploy web static
+        """
+        return do_deploy(do_pack())
